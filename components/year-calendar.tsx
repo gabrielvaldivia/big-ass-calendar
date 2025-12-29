@@ -280,7 +280,13 @@ export function YearCalendar({
             const gap = 1; // matches gap-px
             const pad = 0; // already accounted by wrapper padding style above
             if (!cols || !cellSizePx.w || !cellSizePx.h) return null;
-            const bars: Array<React.ReactElement> = [];
+            type Seg = {
+              row: number;
+              startCol: number;
+              endCol: number;
+              ev: AllDayEvent;
+            };
+            const rowToSegs = new Map<number, Seg[]>();
             for (const ev of events) {
               const startIdx = dayIndexByKey.get(ev.startDate);
               const endIdxExclusive = dayIndexByKey.get(ev.endDate);
@@ -292,14 +298,47 @@ export function YearCalendar({
                   endIdxExclusive,
                   (row + 1) * cols
                 );
-                const colStart0 = segStart % cols; // 0-based
-                const span = rowEndExclusive - segStart;
-                const left = pad + colStart0 * (cellSizePx.w + gap);
-                const top = pad + row * (cellSizePx.h + gap) + 20; // 20px to clear numbers
+                const startCol = segStart % cols; // 0-based inclusive
+                const endCol =
+                  rowEndExclusive % cols === 0 ? cols : rowEndExclusive % cols; // 1..cols inclusive
+                const list = rowToSegs.get(row) ?? [];
+                list.push({ row, startCol, endCol, ev });
+                rowToSegs.set(row, list);
+                segStart = rowEndExclusive;
+              }
+            }
+            const bars: Array<React.ReactElement> = [];
+            const labelOffset = 16;
+            const laneHeight = 16;
+            const maxLanes = Math.max(
+              1,
+              Math.floor((cellSizePx.h - labelOffset - 2) / laneHeight)
+            );
+            for (const [row, segs] of rowToSegs) {
+              segs.sort((a, b) => a.startCol - b.startCol);
+              const laneEnds: number[] = [];
+              for (const seg of segs) {
+                let lane = 0;
+                while (
+                  lane < laneEnds.length &&
+                  seg.startCol < laneEnds[lane]
+                ) {
+                  lane++;
+                }
+                if (lane >= maxLanes) continue;
+                if (lane === laneEnds.length) laneEnds.push(seg.endCol);
+                else laneEnds[lane] = seg.endCol;
+                const left = pad + seg.startCol * (cellSizePx.w + gap);
+                const top =
+                  pad +
+                  row * (cellSizePx.h + gap) +
+                  labelOffset +
+                  lane * laneHeight;
+                const span = seg.endCol - seg.startCol;
                 const width = span * cellSizePx.w + (span - 1) * gap;
-                const key = `${ev.id}:${row}:${colStart0}-${span}`;
-                const bg = ev.calendarId
-                  ? calendarColors[ev.calendarId]
+                const key = `${seg.ev.id}:${row}:${seg.startCol}-${seg.endCol}:${lane}`;
+                const bg = seg.ev.calendarId
+                  ? calendarColors[seg.ev.calendarId]
                   : undefined;
                 bars.push(
                   <div
@@ -309,6 +348,7 @@ export function YearCalendar({
                       left,
                       top,
                       width,
+                      height: laneHeight - 2,
                     }}
                     className="px-1 pointer-events-auto"
                     onClick={(e) => {
@@ -316,28 +356,35 @@ export function YearCalendar({
                         e.currentTarget as HTMLDivElement
                       ).getBoundingClientRect();
                       setPopover({
-                        event: ev,
+                        event: seg.ev,
                         x: rect.left + rect.width / 2,
                         y: rect.bottom + 8,
                       });
                     }}
                   >
                     <div
-                      className="truncate rounded-sm px-1 py-0.5 text-[10px] shadow-sm"
+                      className="truncate rounded-sm px-1 text-[10px] leading-[14px] shadow-sm"
                       style={{
                         backgroundColor: bg || "hsl(var(--secondary))",
                         color: "hsl(var(--secondary-foreground))",
+                        height: laneHeight - 2,
+                        lineHeight: `${laneHeight - 4}px`,
                       }}
                     >
-                      {ev.summary}
+                      {seg.ev.summary}
                     </div>
                   </div>
                 );
-                segStart = rowEndExclusive;
               }
             }
             return bars;
-          }, [events, dayIndexByKey, gridDims.cols, cellSizePx])}
+          }, [
+            events,
+            dayIndexByKey,
+            gridDims.cols,
+            cellSizePx,
+            calendarColors,
+          ])}
         </div>
       </div>
       {popover.event && (
