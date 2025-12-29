@@ -4,8 +4,7 @@ import { PrismaAdapter } from "@auth/prisma-adapter";
 // @ts-ignore - ESM interop
 import { prisma } from "./prisma";
 
-const GOOGLE_AUTHORIZATION_URL =
-  "https://accounts.google.com/o/oauth2/v2/auth?prompt=consent&access_type=offline&response_type=code";
+// Ensure we always request offline access and explicit consent so Google issues a refresh_token.
 
 async function refreshAccessToken(token: any) {
   try {
@@ -67,12 +66,15 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
       authorization: {
-        url: GOOGLE_AUTHORIZATION_URL,
         params: {
+          // Rely on provider default base URL; just supply params so NextAuth merges them correctly.
+          prompt: "consent",
+          access_type: "offline",
+          response_type: "code",
           scope:
             "openid email profile https://www.googleapis.com/auth/calendar.readonly https://www.googleapis.com/auth/calendar.events",
         },
-      },
+      } as any,
     }),
   ],
   callbacks: {
