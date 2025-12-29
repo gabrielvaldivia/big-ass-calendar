@@ -98,6 +98,26 @@ const monthShort = [
   "Dec",
 ];
 
+function hexToRgba(hex: string, alpha = 0.35) {
+  try {
+    let h = hex.replace("#", "").trim();
+    if (h.length === 3) {
+      h = h
+        .split("")
+        .map((c) => c + c)
+        .join("");
+    }
+    const r = parseInt(h.slice(0, 2), 16);
+    const g = parseInt(h.slice(2, 4), 16);
+    const b = parseInt(h.slice(4, 6), 16);
+    if ([r, g, b].some((n) => Number.isNaN(n))) return hex;
+    const a = Math.min(1, Math.max(0, alpha));
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  } catch {
+    return hex;
+  }
+}
+
 export function YearCalendar({
   year,
   events,
@@ -372,7 +392,9 @@ export function YearCalendar({
                     <div
                       className="truncate rounded-sm px-1 text-[10px] leading-[14px] shadow-sm"
                       style={{
-                        backgroundColor: bg || "hsl(var(--secondary))",
+                        backgroundColor: bg
+                          ? hexToRgba(bg, 0.35)
+                          : "hsl(var(--secondary) / 0.35)",
                         color: "hsl(var(--secondary-foreground))",
                         height: laneHeight - 2,
                         lineHeight: `${laneHeight - 4}px`,

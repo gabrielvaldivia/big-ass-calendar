@@ -469,26 +469,6 @@ export default function HomePage() {
                   <div className="text-xs text-muted-foreground">Defaults to all-day.</div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Calendar</label>
-                  <select
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
-                    value={createCalendarId}
-                    onChange={(e) => setCreateCalendarId(e.target.value)}
-                    disabled={createSubmitting}
-                  >
-                    {(writableCalendars.length ? writableCalendars : calendars).map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {(c.accountEmail ? `${c.accountEmail} — ` : "") + c.summary}
-                      </option>
-                    ))}
-                  </select>
-                  {writableCalendars.length === 0 && calendars.length > 0 && (
-                    <div className="text-xs text-muted-foreground">
-                      No writable calendars found; creating may fail on read-only calendars.
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
@@ -517,6 +497,26 @@ export default function HomePage() {
                       <div className="text-xs text-muted-foreground">
                         End date is inclusive (we’ll convert it correctly for Google Calendar).
                       </div>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Calendar</label>
+                  <select
+                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                    value={createCalendarId}
+                    onChange={(e) => setCreateCalendarId(e.target.value)}
+                    disabled={createSubmitting}
+                  >
+                    {(writableCalendars.length ? writableCalendars : calendars).map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {(c.accountEmail ? `${c.accountEmail} — ` : "") + c.summary}
+                      </option>
+                    ))}
+                  </select>
+                  {writableCalendars.length === 0 && calendars.length > 0 && (
+                    <div className="text-xs text-muted-foreground">
+                      No writable calendars found; creating may fail on read-only calendars.
                     </div>
                   )}
                 </div>

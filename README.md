@@ -40,3 +40,4 @@ Open `http://localhost:3000`, sign in with Google, and you’ll see your all-day
 - The calendar auto-fills the entire viewport (full width and height).
 
 
+
