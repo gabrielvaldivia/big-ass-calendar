@@ -62,6 +62,35 @@ export default function HomePage() {
       c.accessRole ? canWrite.has(c.accessRole) : false
     );
   }, [calendars]);
+  const writableAccountsWithCalendars = useMemo(() => {
+    const writableSet = new Set(writableCalendars.map((c) => c.id));
+    if (accounts.length > 0) {
+      return accounts.map((acc) => ({
+        accountId: acc.accountId,
+        email: acc.email || "Other",
+        list: writableCalendars.filter((c) =>
+          c.id.startsWith(`${acc.accountId}|`)
+        ),
+      })).filter((group) => group.list.length > 0);
+    }
+    // Fallback grouping if accounts not provided
+    const map = new Map<string, CalendarListItem[]>();
+    const emailByAcc = new Map<string, string>();
+    for (const c of writableCalendars) {
+      const accId = c.id.includes("|") ? c.id.split("|")[0] : "";
+      const email = c.accountEmail || "Other";
+      emailByAcc.set(accId, email);
+      const key = accId || email;
+      const arr = map.get(key) ?? [];
+      arr.push(c);
+      map.set(key, arr);
+    }
+    return Array.from(map.entries()).map(([key, list]) => ({
+      accountId: key,
+      email: emailByAcc.get(key) || "Other",
+      list,
+    }));
+  }, [writableCalendars, accounts]);
   const accountsWithCalendars = useMemo(() => {
     if (accounts.length > 0) {
       return accounts.map((acc) => ({
@@ -600,15 +629,29 @@ export default function HomePage() {
                     onChange={(e) => setCreateCalendarId(e.target.value)}
                     disabled={createSubmitting}
                   >
-                    {(writableCalendars.length
-                      ? writableCalendars
-                      : calendars
-                    ).map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {(c.accountEmail ? `${c.accountEmail} — ` : "") +
-                          c.summary}
-                      </option>
-                    ))}
+                    {writableCalendars.length > 0 ? (
+                      writableAccountsWithCalendars.map(
+                        ({ accountId, email, list }) => (
+                          <optgroup
+                            key={accountId || email}
+                            label={email && email.length ? email : accountId || "Account"}
+                          >
+                            {list.map((c) => (
+                              <option key={c.id} value={c.id}>
+                                {c.summary}
+                              </option>
+                            ))}
+                          </optgroup>
+                        )
+                      )
+                    ) : (
+                      calendars.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {(c.accountEmail ? `${c.accountEmail} — ` : "") +
+                            c.summary}
+                        </option>
+                      ))
+                    )}
                   </select>
                   {writableCalendars.length === 0 && calendars.length > 0 && (
                     <div className="text-xs text-muted-foreground">
