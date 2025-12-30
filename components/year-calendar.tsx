@@ -769,7 +769,7 @@ export function YearCalendar({
       {!signedIn && (
         <div className="fixed inset-0 flex items-center justify-center bg-background/70">
           <div className="rounded-md border bg-card p-12 text-center shadow-sm pointer-events-auto">
-            <div className="text-lg font-medium mb-2">Yearly Calendar</div>
+            <div className="text-lg font-medium mb-2">Big Year</div>
             <div className="text-sm text-muted-foreground mb-4">
               Only all-day events will appear once you sign in.
             </div>

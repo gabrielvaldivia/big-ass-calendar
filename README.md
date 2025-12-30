@@ -1,4 +1,4 @@
-# Yearly Calendar
+# Big Year
 
 Full-screen yearly calendar that shows only all-day events from your Google Calendar. Built with Next.js (App Router), Tailwind CSS, and shadcn-style UI components.
 

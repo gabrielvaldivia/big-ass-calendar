@@ -3,7 +3,7 @@ import { Providers } from "./providers";
 import React from "react";
 
 export const metadata = {
-  title: "Yearly Calendar",
+  title: "Big Year",
   description: "Full-year calendar with Google all-day events",
 };
 
