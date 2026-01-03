@@ -2,6 +2,15 @@
 import { useSession, signIn, signOut } from "next-auth/react";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { YearCalendar, AllDayEvent } from "@/components/year-calendar";
 import {
   ChevronLeft,
@@ -10,6 +19,7 @@ import {
   Plus,
   RefreshCcw,
   Settings,
+  X,
 } from "lucide-react";
 
 type CalendarListItem = {
@@ -391,6 +401,16 @@ export default function HomePage() {
     setCreateCalendarId(primaryWritable || firstWritable || firstAny || "");
   }, [createOpen, calendars, writableCalendars, year]);
 
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape" && createOpen && !createSubmitting) {
+        setCreateOpen(false);
+      }
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [createOpen, createSubmitting]);
+
   // Persist preferences to server whenever they change
   useEffect(() => {
     if (status === "authenticated" && preferencesLoaded.current) {
@@ -588,31 +608,36 @@ export default function HomePage() {
         <>
           <div
             className="fixed inset-0 bg-background/60 z-40"
-            onClick={() => (createSubmitting ? null : setCreateOpen(false))}
+            onClick={() => {
+              if (!createSubmitting) {
+                setCreateOpen(false);
+              }
+            }}
             aria-hidden
           />
           <div
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none"
             role="dialog"
             aria-label="Create event"
           >
-            <div className="w-full max-w-md rounded-md border bg-card shadow-lg">
-              <div className="p-4 border-b flex items-center justify-between">
+            <div
+              className="w-full max-w-md rounded-md border bg-card shadow-lg pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="px-4 pt-4 pb-2 flex items-center justify-between">
                 <div className="font-semibold">Create event</div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="text-[22px] leading-none"
+                <button
+                  className="text-muted-foreground hover:text-foreground flex-shrink-0 ml-2"
                   onClick={() =>
                     createSubmitting ? null : setCreateOpen(false)
                   }
                   aria-label="Close"
                   disabled={createSubmitting}
                 >
-                  ×
-                </Button>
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <div className="p-4 space-y-4">
+              <div className="px-4 pt-2 pb-4 space-y-4">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Title</label>
                   <input
@@ -644,9 +669,6 @@ export default function HomePage() {
                     }}
                     disabled={createSubmitting}
                   />
-                  <div className="text-xs text-muted-foreground">
-                    Defaults to all-day.
-                  </div>
                 </div>
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm">
@@ -684,38 +706,40 @@ export default function HomePage() {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Calendar</label>
-                  <select
-                    className="w-full rounded-md border bg-background px-3 py-2 text-sm"
+                  <Select
                     value={createCalendarId}
-                    onChange={(e) => setCreateCalendarId(e.target.value)}
+                    onValueChange={setCreateCalendarId}
                     disabled={createSubmitting}
                   >
-                    {writableCalendars.length > 0
-                      ? writableAccountsWithCalendars.map(
-                          ({ accountId, email, list }) => (
-                            <optgroup
-                              key={accountId || email}
-                              label={
-                                email && email.length
-                                  ? email
-                                  : accountId || "Account"
-                              }
-                            >
-                              {list.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.summary}
-                                </option>
-                              ))}
-                            </optgroup>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a calendar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {writableCalendars.length > 0
+                        ? writableAccountsWithCalendars.map(
+                            ({ accountId, email, list }) => (
+                              <SelectGroup key={accountId || email}>
+                                <SelectLabel>
+                                  {email && email.length
+                                    ? email
+                                    : accountId || "Account"}
+                                </SelectLabel>
+                                {list.map((c) => (
+                                  <SelectItem key={c.id} value={c.id}>
+                                    {c.summary}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            )
                           )
-                        )
-                      : calendars.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {(c.accountEmail ? `${c.accountEmail} — ` : "") +
-                              c.summary}
-                          </option>
-                        ))}
-                  </select>
+                        : calendars.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {(c.accountEmail ? `${c.accountEmail} — ` : "") +
+                                c.summary}
+                            </SelectItem>
+                          ))}
+                    </SelectContent>
+                  </Select>
                   {writableCalendars.length === 0 && calendars.length > 0 && (
                     <div className="text-xs text-muted-foreground">
                       No writable calendars found; creating may fail on

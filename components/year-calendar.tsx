@@ -4,6 +4,15 @@ import { cn } from "@/lib/utils";
 import { Calendar as CalendarIcon, X } from "lucide-react";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export type AllDayEvent = {
   id: string;
@@ -371,7 +380,7 @@ export function YearCalendar({
                   )}
                 >
                   {showDaysOfWeek && (
-                    <span className="text-[8px] opacity-60 mr-0.5">
+                    <span className="text-[10px] opacity-60 mr-0.5">
                       {dayOfWeekShort[date.getDay()]}
                     </span>
                   )}
@@ -588,38 +597,40 @@ export function YearCalendar({
                 </div>
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Calendar</label>
-                  <select
-                    className="w-full rounded-md border bg-background px-2 py-1.5 text-sm"
+                  <Select
                     value={editCalendarId}
-                    onChange={(e) => setEditCalendarId(e.target.value)}
+                    onValueChange={setEditCalendarId}
                     disabled={isSubmitting}
                   >
-                    {writableAccountsWithCalendars.length > 0
-                      ? writableAccountsWithCalendars.map(
-                          ({ accountId, email, list }) => (
-                            <optgroup
-                              key={accountId || email}
-                              label={
-                                email && email.length
-                                  ? email
-                                  : accountId || "Account"
-                              }
-                            >
-                              {list.map((c) => (
-                                <option key={c.id} value={c.id}>
-                                  {c.summary}
-                                </option>
-                              ))}
-                            </optgroup>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a calendar" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {writableAccountsWithCalendars.length > 0
+                        ? writableAccountsWithCalendars.map(
+                            ({ accountId, email, list }) => (
+                              <SelectGroup key={accountId || email}>
+                                <SelectLabel>
+                                  {email && email.length
+                                    ? email
+                                    : accountId || "Account"}
+                                </SelectLabel>
+                                {list.map((c) => (
+                                  <SelectItem key={c.id} value={c.id}>
+                                    {c.summary}
+                                  </SelectItem>
+                                ))}
+                              </SelectGroup>
+                            )
                           )
-                        )
-                      : writableCalendars.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {(c.accountEmail ? `${c.accountEmail} — ` : "") +
-                              c.summary}
-                          </option>
-                        ))}
-                  </select>
+                        : writableCalendars.map((c) => (
+                            <SelectItem key={c.id} value={c.id}>
+                              {(c.accountEmail ? `${c.accountEmail} — ` : "") +
+                                c.summary}
+                            </SelectItem>
+                          ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
               <div className="px-3 pb-3 border-t flex items-center justify-end gap-2 pt-3">
