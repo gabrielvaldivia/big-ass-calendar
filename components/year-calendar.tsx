@@ -365,16 +365,22 @@ export function YearCalendar({
                 {isFirstOfMonth && (
                   <div className="absolute top-1 left-1 text-[10px] leading-none uppercase tracking-wide text-primary">
                     {monthShort[date.getMonth()]}
+                    {showDaysOfWeek && (
+                      <span className="text-[10px] opacity-60">
+                        {dayOfWeekShort[date.getDay()]}
+                      </span>
+                    )}
                   </div>
                 )}
                 <div
                   className={cn(
                     "mb-0.5 text-[10px] leading-none text-muted-foreground",
                     isToday && "text-primary font-semibold",
-                    isFirstOfMonth && "ml-7"
+                    isFirstOfMonth && showDaysOfWeek && "ml-11",
+                    isFirstOfMonth && !showDaysOfWeek && "ml-6"
                   )}
                 >
-                  {showDaysOfWeek && (
+                  {!isFirstOfMonth && showDaysOfWeek && (
                     <span className="text-[10px] opacity-60 mr-0.5">
                       {dayOfWeekShort[date.getDay()]}
                     </span>
