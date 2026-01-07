@@ -174,6 +174,50 @@ For complete removal of warnings and a verified badge:
 
 **Important**: The privacy policy and terms pages are already created at `/privacy` and `/terms`. Make sure your app is deployed so these URLs are accessible before submitting for verification.
 
+## Troubleshooting: "Verified" but Still Seeing Warnings
+
+If Google Cloud Console shows your app as verified (green checkmark) but you're still seeing "Google hasn't verified this app" warnings:
+
+### 1. Check Verification Center Details
+
+1. Go to [Google Cloud Console OAuth consent screen](https://console.cloud.google.com/apis/credentials/consent)
+2. Click **"Go to Verification Center"** (in the App verification section)
+3. Check the detailed verification status:
+   - Is verification complete for all scopes?
+   - Are there any pending items?
+   - Does it show verification for sensitive scopes like `calendar.events`?
+
+### 2. Clear Browser Cache
+
+The warning may be cached in your browser:
+
+1. Clear cookies for `accounts.google.com`
+2. Or use an **incognito/private window** to test
+3. Try signing in again
+
+### 3. Wait for Propagation
+
+Even after verification:
+
+- Changes can take **24-48 hours** to fully propagate
+- The warning may persist briefly even after verification
+- Different Google services may update at different times
+
+### 4. Verify All Scopes Are Covered
+
+Sometimes verification is complete for branding but not for sensitive scopes:
+
+- Check that `calendar.events` scope is included in verification
+- Sensitive scopes may require additional verification steps
+
+### 5. Users Can Still Proceed
+
+Even with the warning:
+
+- Users can click **"Advanced"** → **"Go to [app name] (unsafe)"** to proceed
+- The app will work normally
+- The warning is informational, not a blocker
+
 ## Fixing Domain Verification Issues
 
 If you see an error in Google Cloud Console that says "The website of your home page URL 'https://bigyear.app' is not registered to you", you need to verify domain ownership.
