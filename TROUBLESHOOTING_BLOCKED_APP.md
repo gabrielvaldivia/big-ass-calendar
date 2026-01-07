@@ -100,6 +100,7 @@ If you see a "You need additional access" error, even though you're the only use
 **Option C: If You Can't Access IAM Either**
 
 If you can't access IAM & Admin, you may need to:
+
 1. Check if you're signed in with the correct Google account
 2. The project might be under a different Google account - check the project dropdown to see all projects
 3. If the project was created by a different account, you'll need that account to grant you permissions
@@ -174,11 +175,13 @@ Once you're on the OAuth consent screen page:
 Try these workarounds:
 
 1. **Check via OAuth Client ID page:**
+
    - Go to "APIs & Services" → "Credentials"
    - Click on your OAuth 2.0 Client ID name
    - Look for publishing status or consent screen information there
 
 2. **Try the classic URL format:**
+
    - Get your Project ID from the URL or project dropdown
    - Try: `https://console.cloud.google.com/apis/credentials/consent?project=YOUR_PROJECT_ID`
    - Sometimes the new Google Auth Platform interface has bugs, but the classic interface works
@@ -215,6 +218,7 @@ Even if published, verify these settings:
 #### B. Check Scopes
 
 Under **Scopes**, ensure ALL of these are listed:
+
 - ✅ `openid`
 - ✅ `email`
 - ✅ `profile`
@@ -267,11 +271,13 @@ After making changes:
 #### Issue: Only Some Users Blocked
 
 **Possible causes**:
+
 - Those users' Google accounts are in restricted countries
 - Those users need to clear their browser cache
 - Those users are using a different Google account that has restrictions
 
-**Solution**: 
+**Solution**:
+
 - Check country restrictions in OAuth consent screen
 - Ask users to try incognito mode
 - Ask users to try a different Google account
@@ -279,6 +285,7 @@ After making changes:
 #### Issue: App is Published but Still Blocked
 
 **Check**:
+
 1. Are all scopes listed in OAuth consent screen?
 2. Is the redirect URI correct?
 3. Are there any country restrictions?
@@ -291,6 +298,7 @@ After making changes:
 If you've tried everything and still can't access the OAuth consent screen (even with Owner role, different machines, browsers, etc.):
 
 1. **See `ALTERNATIVE_SOLUTIONS.md`** for:
+
    - Using gcloud CLI to check/publish
    - Granting specific `oauthconfig.editor` role
    - Checking required APIs
@@ -298,6 +306,7 @@ If you've tried everything and still can't access the OAuth consent screen (even
    - Contacting Google Support
 
 2. **Try creating a new OAuth client** - this sometimes triggers the consent screen setup wizard:
+
    - Go to "APIs & Services" → "Credentials"
    - Click "+ CREATE CREDENTIALS" → "OAuth client ID"
    - If prompted to configure consent screen, click that link
@@ -327,4 +336,3 @@ If you've checked all of the above and users are still blocked:
 2. Check the Verification Center for any pending items
 3. Note the exact error message users are seeing
 4. Check if the issue affects all users or only specific users/countries
-

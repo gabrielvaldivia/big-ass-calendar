@@ -301,13 +301,48 @@ export function YearCalendar({
         const cellSize = Math.min(widthBasedCell, heightBasedCell);
         setGridDims({ cols, cell: cellSize });
       } else {
-        setGridDims(
-          computeSquareGridColumns(
-            days.length,
-            window.innerWidth,
-            window.innerHeight
-          )
+        const minCellSize = 60; // Minimum cell size in pixels (same as alignWeekends)
+        const computed = computeSquareGridColumns(
+          days.length,
+          window.innerWidth,
+          window.innerHeight
         );
+        // Ensure minimum cell size is respected
+        if (computed.cell < minCellSize) {
+          // Recalculate with minimum cell size constraint
+          const gap = 1;
+          const usableWidth = window.innerWidth - 2;
+          const usableHeight = window.innerHeight - 2;
+
+          // Calculate maximum columns that fit with minimum cell size
+          const maxCols = Math.floor((usableWidth + gap) / (minCellSize + gap));
+
+          // Calculate cell size based on width constraint
+          const widthBasedCell =
+            maxCols > 0
+              ? Math.max(
+                  minCellSize,
+                  Math.floor((usableWidth - (maxCols - 1) * gap) / maxCols)
+                )
+              : minCellSize;
+
+          // Calculate cell size based on height constraint
+          const rows = Math.ceil(days.length / maxCols);
+          const heightBasedCell =
+            rows > 0
+              ? Math.max(
+                  minCellSize,
+                  Math.floor((usableHeight - (rows - 1) * gap) / rows)
+                )
+              : minCellSize;
+
+          // Use the smaller of the two to ensure it fits both dimensions
+          const cellSize = Math.min(widthBasedCell, heightBasedCell);
+
+          setGridDims({ cols: maxCols || 1, cell: cellSize });
+        } else {
+          setGridDims(computed);
+        }
       }
     }
     onResize();

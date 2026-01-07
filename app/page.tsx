@@ -586,7 +586,8 @@ export default function HomePage() {
         <div className="flex items-center justify-end gap-2">
           <Button
             variant="outline"
-            className="gap-2 rounded-full justify-center"
+            size="icon"
+            className="rounded-full"
             onClick={() => setCreateOpen(true)}
             disabled={status !== "authenticated"}
             aria-label="Create event"
@@ -597,7 +598,6 @@ export default function HomePage() {
             }
           >
             <Plus className="h-4 w-4" />
-            <span>Create event</span>
           </Button>
         </div>
       </div>
