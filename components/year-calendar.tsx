@@ -270,7 +270,7 @@ export function YearCalendar({
       if (alignWeekends) {
         // Dynamically calculate how many weeks can fit based on viewport width
         const gap = 1;
-        const minCellSize = 60; // Minimum cell size in pixels (50-100px range)
+        const minCellSize = 70; // Minimum cell size in pixels (to fit 3 events: 16 label + 3*16 events + 2 padding = 66px, rounded to 70px)
         const usableWidth = window.innerWidth - 2; // account for border
         const usableHeight = window.innerHeight - 2; // account for border
 
@@ -301,47 +301,68 @@ export function YearCalendar({
         const cellSize = Math.min(widthBasedCell, heightBasedCell);
         setGridDims({ cols, cell: cellSize });
       } else {
-        const minCellSize = 60; // Minimum cell size in pixels (same as alignWeekends)
-        const computed = computeSquareGridColumns(
-          days.length,
-          window.innerWidth,
-          window.innerHeight
-        );
-        // Ensure minimum cell size is respected
-        if (computed.cell < minCellSize) {
-          // Recalculate with minimum cell size constraint
-          const gap = 1;
-          const usableWidth = window.innerWidth - 2;
-          const usableHeight = window.innerHeight - 2;
+        const minCellSize = 70; // Minimum cell size in pixels (same as alignWeekends - to fit 3 events)
+        const gap = 1;
+        const usableWidth = window.innerWidth - 2;
+        const usableHeight = window.innerHeight - 2;
+        const isMobile = usableWidth < 768; // Mobile breakpoint
 
-          // Calculate maximum columns that fit with minimum cell size
+        if (isMobile) {
+          // On mobile, prioritize fitting at least 7 days horizontally
+          // Don't force square cells - allow taller cells if needed
+          const minCols = 7; // At least 7 days (a week) must fit
           const maxCols = Math.floor((usableWidth + gap) / (minCellSize + gap));
 
-          // Calculate cell size based on width constraint
-          const widthBasedCell =
-            maxCols > 0
-              ? Math.max(
-                  minCellSize,
-                  Math.floor((usableWidth - (maxCols - 1) * gap) / maxCols)
-                )
-              : minCellSize;
+          // Use at least 7 columns, or as many as fit
+          const cols = Math.max(minCols, maxCols);
 
-          // Calculate cell size based on height constraint
-          const rows = Math.ceil(days.length / maxCols);
-          const heightBasedCell =
-            rows > 0
-              ? Math.max(
-                  minCellSize,
-                  Math.floor((usableHeight - (rows - 1) * gap) / rows)
-                )
-              : minCellSize;
+          // Calculate cell size based on width constraint (allow taller than wide)
+          const cellSize = Math.max(
+            minCellSize,
+            Math.floor((usableWidth - (cols - 1) * gap) / cols)
+          );
 
-          // Use the smaller of the two to ensure it fits both dimensions
-          const cellSize = Math.min(widthBasedCell, heightBasedCell);
-
-          setGridDims({ cols: maxCols || 1, cell: cellSize });
+          setGridDims({ cols, cell: cellSize });
         } else {
-          setGridDims(computed);
+          // On larger screens, use square grid logic
+          const computed = computeSquareGridColumns(
+            days.length,
+            window.innerWidth,
+            window.innerHeight
+          );
+          // Ensure minimum cell size is respected
+          if (computed.cell < minCellSize) {
+            // Recalculate with minimum cell size constraint
+            const maxCols = Math.floor(
+              (usableWidth + gap) / (minCellSize + gap)
+            );
+
+            // Calculate cell size based on width constraint
+            const widthBasedCell =
+              maxCols > 0
+                ? Math.max(
+                    minCellSize,
+                    Math.floor((usableWidth - (maxCols - 1) * gap) / maxCols)
+                  )
+                : minCellSize;
+
+            // Calculate cell size based on height constraint
+            const rows = Math.ceil(days.length / maxCols);
+            const heightBasedCell =
+              rows > 0
+                ? Math.max(
+                    minCellSize,
+                    Math.floor((usableHeight - (rows - 1) * gap) / rows)
+                  )
+                : minCellSize;
+
+            // Use the smaller of the two to ensure it fits both dimensions
+            const cellSize = Math.min(widthBasedCell, heightBasedCell);
+
+            setGridDims({ cols: maxCols || 1, cell: cellSize });
+          } else {
+            setGridDims(computed);
+          }
         }
       }
     }
